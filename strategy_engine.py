@@ -40,19 +40,41 @@ class Config:
     @classmethod
     def apply_settings(cls):
         """Apply the configuration settings to the environment."""
+        # Register Chinese font for matplotlib
+        cls.register_matplotlib_font()
+        
         for key, value in cls.PLT_PARAMS.items():
             plt.rcParams[key] = value
         for key, value in cls.PD_OPTIONS.items():
             pd.set_option(key, value)
 
+    @classmethod
+    def register_matplotlib_font(cls):
+        """Register Chinese font for matplotlib."""
+        font_path = "SIMHEI.TTF"
+        if os.path.exists(font_path):
+            try:
+                from matplotlib import font_manager
+                font_manager.fontManager.addfont(font_path)
+                print(f"Successfully registered font: {font_path}")
+            except Exception as e:
+                print(f"Warning: Could not register matplotlib font {font_path}: {e}")
+        else:
+            print(f"Warning: Font file {font_path} not found")
+
     @staticmethod
     def register_chinese_font() -> str:
         """Register a Chinese font for PDF generation."""
         font_name = "SimHei"
+        font_path = "SIMHEI.TTF"
+        
         try:
-            pdfmetrics.registerFont(TTFont('SimHei', 'simhei.ttf'))
+            # Try to register the provided SIMHEI.TTF font
+            pdfmetrics.registerFont(TTFont('SimHei', font_path))
             return "SimHei"
-        except:
+        except Exception as e:
+            print(f"Warning: Could not register SIMHEI.TTF: {e}")
+            # Fallback to system fonts
             font_candidates = [
                 ("MicrosoftYaHei", "msyh.ttc"),
                 ("PingFang", "/System/Library/Fonts/PingFang.ttc"),
@@ -196,10 +218,14 @@ class ReportGenerator:
         """Export result dataframe to CSV."""
         df.to_csv(path, index=False, encoding='utf-8-sig')
 
-    def generate_pdf(self, result_df: pd.DataFrame, weights: np.ndarray, etf_names: Dict[str, str], output_path: str):
+    def generate_pdf(self, result_df: pd.DataFrame, weights: np.ndarray, etf_names: Dict[str, str], output_path: str = None, buffer: io.BytesIO = None):
         """Generate a visual PDF report with table and pie chart."""
+        if buffer is None and output_path is None:
+            raise ValueError("Either output_path or buffer must be provided")
+        
         doc = SimpleDocTemplate(
-            output_path, pagesize=A4, rightMargin=inch/2, leftMargin=inch/2, topMargin=inch/2, bottomMargin=inch/2
+            output_path if output_path else buffer, 
+            pagesize=A4, rightMargin=inch/2, leftMargin=inch/2, topMargin=inch/2, bottomMargin=inch/2
         )
         story = []
         
@@ -249,6 +275,11 @@ class ReportGenerator:
     def create_pie_chart(self, weights, labels):
         """Create and return a matplotlib figure for the pie chart."""
         fig = plt.figure(figsize=(10, 7))
+        
+        # Set font for Chinese characters - try multiple fallbacks
+        plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'DejaVu Sans', 'Arial Unicode MS', 'sans-serif']
+        plt.rcParams['axes.unicode_minus'] = False
+        
         explode = [0.05] * len(labels)
         plt.pie(
             weights, labels=labels, autopct='%1.1f%%',

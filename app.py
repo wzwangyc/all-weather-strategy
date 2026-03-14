@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import io
 from datetime import datetime
 from strategy_engine import AllWeatherEngine, Config, ReportGenerator
 
@@ -91,10 +92,18 @@ if st.sidebar.button("开始计算"):
                 file_name=f"AllWeather_Plan_{timestamp}.csv",
                 mime="text/csv"
             )
-
-            # Note: PDF generation would require file writing/reading locally, 
-            # for now we focus on the web UI experience.
-            st.info("💡 提示：如需 PDF 详尽报告，请点击上方下载方案或在后台导出。")
+            
+            # PDF Download
+            pdf_buffer = io.BytesIO()
+            gen = ReportGenerator(Config.register_chinese_font(), total_amount)
+            gen.generate_pdf(results['result_df'], results['weights'], results['etf_names'], pdf_buffer)
+            pdf_data = pdf_buffer.getvalue()
+            col2.download_button(
+                label="下载 PDF 报告",
+                data=pdf_data,
+                file_name=f"AllWeather_Report_{timestamp}.pdf",
+                mime="application/pdf"
+            )
         else:
             st.error("计算失败，请检查 ETF 代码是否正确或网络是否通畅。")
 
