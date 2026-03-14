@@ -1,0 +1,8 @@
+akshare
+yfinance
+numpy
+pandas
+matplotlib
+scipy
+reportlab
+streamlit
