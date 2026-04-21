@@ -48,7 +48,20 @@ def render_app() -> None:
             status_text.text(text)
 
         engine = AllWeatherEngine(etf_list)
-        results = engine.run(total_amount=total_amount, lookback_days=lookback_days, progress_callback=update_progress)
+        try:
+            results = engine.run(
+                total_amount=total_amount,
+                lookback_days=lookback_days,
+                progress_callback=update_progress,
+            )
+        except Exception as exc:
+            progress_bar.empty()
+            status_text.empty()
+            if "Rate limited" in str(exc) or "Too Many Requests" in str(exc):
+                st.error("Yahoo Finance 触发了限流，请稍后再试，或减少频繁刷新。")
+            else:
+                st.error(f"计算失败：{exc}")
+            return
 
         st.success("配置方案计算完成")
 
