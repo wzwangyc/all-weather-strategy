@@ -1,48 +1,28 @@
 # All Weather Strategy
 
-This repository is a refactored Python project for the "test two" style delivery described in `REQ.txt`.
+This repository now keeps only the yfinance-based Streamlit demo for GitHub.
 
-## What It Does
+## Demo
 
-The app reads ETF history from repository-managed offline CSV files, computes a risk parity allocation, and exports the result as a table, CSV, and PDF report.
+Live app: https://all-weather-strategy.streamlit.app/
 
-## Versions
+## What Is Included
 
-- `yfinance` version: default demo path and the recommended Streamlit web experience.
-- `Tushare` version: local build path that requires a `TUSHARE_TOKEN` and generates the same offline CSV contract.
+- `app.py`: Streamlit entry point.
+- `all_weather_strategy/`: runtime package for offline ETF allocation.
+- `data/offline/`: local CSV dataset used by the app.
+- `SIMHEI.TTF`: bundled font for Chinese rendering in charts and reports.
+- `requirements.txt`: pinned runtime dependencies.
 
-## Structure
-
-- `app.py`: Streamlit launcher.
-- `all_weather_strategy/`: core package with configuration, domain types, offline data loading, optimization, reporting, and UI.
-- `data/offline/`: offline ETF dataset used at runtime.
-- `data/reports/`: generated outputs.
-- `docs/`: project structure, principle, and requirement notes.
-- `scripts/`: maintenance utilities, including offline data refresh.
-- `sources/original_repo/`: archived upstream source snapshot.
-
-## Run
+## Run Locally
 
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Rebuild Offline Data
-
-```bash
-python scripts/build_offline_data.py
-```
-
-## Build Tushare Offline Data
-
-```bash
-set TUSHARE_TOKEN=your_token_here
-python scripts/build_offline_data_tushare.py
-```
-
 ## Notes
 
-- The runtime path uses local CSV files only.
-- All paths are relative to the repository root.
-- `SIMHEI.TTF` is retained for Chinese chart and PDF rendering.
+- This GitHub version is the simplified yfinance track.
+- The full test-two submission is kept locally in the `测试二：完整python项目` folder.
+- The local test-two folder also contains a Tushare + local-data variant.
