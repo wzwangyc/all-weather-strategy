@@ -1,17 +1,17 @@
 """Application configuration.
 
-The configuration is intentionally explicit so the app can be audited and
-reproduced from the repository alone.
+The GitHub/Streamlit version is a live-fetch demo: it pulls market data from
+Yahoo Finance at runtime and then performs the allocation calculation locally.
 """
 
-from typing import ClassVar, Dict, List
 from pathlib import Path
+from typing import ClassVar, Dict, List
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
 from .domain import Money
-from .paths import FONT_PATH, OFFLINE_DATA_DIR, REPORT_DIR
+from .paths import FONT_PATH, REPORT_DIR
 
 
 class AppConfig:
@@ -24,7 +24,6 @@ class AppConfig:
     MIN_CAPITAL: ClassVar[float] = 100.0
     DEFAULT_CAPITAL: ClassVar[float] = 10000.0
     LOT_SIZE: ClassVar[int] = 100
-    OFFLINE_DATA_DIR: ClassVar[Path] = OFFLINE_DATA_DIR
     REPORT_DIR: ClassVar[Path] = REPORT_DIR
 
     PLOT_PARAMS: ClassVar[Dict[str, object]] = {

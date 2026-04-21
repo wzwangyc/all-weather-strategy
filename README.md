@@ -6,6 +6,11 @@ This repository contains the simplified `yfinance` demo version for GitHub and S
 
 - Streamlit app: https://all-weather-strategy.streamlit.app/
 
+## Runtime
+
+- The web app fetches historical prices from Yahoo Finance at runtime.
+- No stock price history files are committed in this GitHub version.
+
 ## Run Locally
 
 - Open `app.py` in PyCharm and run it.
@@ -15,7 +20,6 @@ This repository contains the simplified `yfinance` demo version for GitHub and S
 
 - `app.py`
 - `all_weather_strategy/`
-- `data/offline/`
 - `requirements.txt`
 - `SIMHEI.TTF`
 

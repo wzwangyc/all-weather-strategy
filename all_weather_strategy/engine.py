@@ -12,19 +12,19 @@ import numpy as np
 import pandas as pd
 
 from .config import AppConfig
-from .data_repository import OfflineETFRepository
+from .data_repository import YFinanceETFRepository
 from .domain import Money, Price, Quantity
 from .reports import ReportGenerator
 from .strategy import RiskParityStrategy
 
 
 class AllWeatherEngine:
-    """Run the complete offline all-weather allocation workflow."""
+    """Run the complete live all-weather allocation workflow."""
 
-    def __init__(self, etf_symbols: List[str], repository: Optional[OfflineETFRepository] = None):
+    def __init__(self, etf_symbols: List[str], repository: Optional[YFinanceETFRepository] = None):
         AppConfig.apply_runtime_settings()
         self.etf_symbols = etf_symbols
-        self.repository = repository or OfflineETFRepository()
+        self.repository = repository or YFinanceETFRepository()
         self.strategy = RiskParityStrategy()
 
     def _validate_inputs(self, total_amount: Money, lookback_days: int) -> None:
@@ -44,7 +44,7 @@ class AllWeatherEngine:
         self._validate_inputs(capital, lookback_days)
 
         if progress_callback:
-            progress_callback(0.1, "正在加载离线数据...")
+            progress_callback(0.1, "???? Yahoo Finance ??????...")
 
         end_date = datetime.now(timezone.utc).date()
         start_date = end_date - timedelta(days=lookback_days)
@@ -56,7 +56,7 @@ class AllWeatherEngine:
         )
 
         if progress_callback:
-            progress_callback(0.7, "正在构建风险平价模型...")
+            progress_callback(0.7, "??????????...")
 
         returns_df = pd.DataFrame(returns_map).dropna()
         if returns_df.empty:
@@ -75,22 +75,22 @@ class AllWeatherEngine:
 
             rows.append(
                 {
-                    "ETF代码": symbol,
-                    "ETF名称": name_map[symbol],
-                    "权重": f"{weight * 100:.2f}%",
-                    "配置金额(元)": f"{allocation.amount:.2f}",
-                    "最新价格(元)": f"{price.amount:.3f}",
-                    "可购股数(股)": shares.shares,
-                    "实际投入金额(元)": f"{actual_amount.amount:.2f}",
+                    "ETF??": symbol,
+                    "ETF??": name_map[symbol],
+                    "??": f"{weight * 100:.2f}%",
+                    "????(?)": f"{allocation.amount:.2f}",
+                    "????(?)": f"{price.amount:.3f}",
+                    "????(?)": shares.shares,
+                    "??????(?)": f"{actual_amount.amount:.2f}",
                 }
             )
 
         result_df = pd.DataFrame(rows)
-        result_df["权重数值"] = result_df["权重"].str.rstrip("%").astype(float)
-        result_df = result_df.sort_values("权重数值", ascending=False).drop(columns=["权重数值"]).reset_index(drop=True)
+        result_df["????"] = result_df["??"].str.rstrip("%").astype(float)
+        result_df = result_df.sort_values("????", ascending=False).drop(columns=["????"]).reset_index(drop=True)
 
         if progress_callback:
-            progress_callback(1.0, "配置完成")
+            progress_callback(1.0, "????")
 
         return {
             "result_df": result_df,
