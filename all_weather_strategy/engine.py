@@ -44,7 +44,7 @@ class AllWeatherEngine:
         self._validate_inputs(capital, lookback_days)
 
         if progress_callback:
-            progress_callback(0.1, "???? Yahoo Finance ??????...")
+            progress_callback(0.1, "Fetching Yahoo Finance history...")
 
         end_date = datetime.now(timezone.utc).date()
         start_date = end_date - timedelta(days=lookback_days)
@@ -56,7 +56,7 @@ class AllWeatherEngine:
         )
 
         if progress_callback:
-            progress_callback(0.7, "??????????...")
+            progress_callback(0.7, "Building risk parity model...")
 
         returns_df = pd.DataFrame(returns_map).dropna()
         if returns_df.empty:
@@ -75,22 +75,22 @@ class AllWeatherEngine:
 
             rows.append(
                 {
-                    "ETF??": symbol,
-                    "ETF??": name_map[symbol],
-                    "??": f"{weight * 100:.2f}%",
-                    "????(?)": f"{allocation.amount:.2f}",
-                    "????(?)": f"{price.amount:.3f}",
-                    "????(?)": shares.shares,
-                    "??????(?)": f"{actual_amount.amount:.2f}",
+                    "ETF_CODE": symbol,
+                    "ETF_NAME": name_map[symbol],
+                    "WEIGHT": f"{weight * 100:.2f}%",
+                    "ALLOCATION_CNY": f"{allocation.amount:.2f}",
+                    "LAST_PRICE_CNY": f"{price.amount:.3f}",
+                    "BUYABLE_SHARES": shares.shares,
+                    "ACTUAL_INVESTMENT_CNY": f"{actual_amount.amount:.2f}",
                 }
             )
 
         result_df = pd.DataFrame(rows)
-        result_df["????"] = result_df["??"].str.rstrip("%").astype(float)
-        result_df = result_df.sort_values("????", ascending=False).drop(columns=["????"]).reset_index(drop=True)
+        result_df["WEIGHT_VALUE"] = result_df["WEIGHT"].str.rstrip("%").astype(float)
+        result_df = result_df.sort_values("WEIGHT_VALUE", ascending=False).drop(columns=["WEIGHT_VALUE"]).reset_index(drop=True)
 
         if progress_callback:
-            progress_callback(1.0, "????")
+            progress_callback(1.0, "Completed")
 
         return {
             "result_df": result_df,

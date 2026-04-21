@@ -23,7 +23,7 @@ from .paths import FONT_PATH
 
 
 def _register_font():
-    """Register the bundled Chinese font and return a FontProperties handle."""
+    """Register the bundled font and return a FontProperties handle."""
     if not FONT_PATH.exists():
         raise FileNotFoundError(f"Font file not found: {FONT_PATH}")
     font_manager.fontManager.addfont(str(FONT_PATH))
@@ -68,7 +68,7 @@ class ReportGenerator:
             wedgeprops={"edgecolor": "white", "linewidth": 1},
         )
         plt.title(
-            f"ETF权重分布（总金额：{self.total_amount:.2f}元）",
+            f"ETF Weight Distribution (Total: {self.total_amount:.2f} CNY)",
             fontsize=14,
             pad=25,
             fontproperties=self.font_prop,
@@ -77,7 +77,14 @@ class ReportGenerator:
         plt.tight_layout()
         return fig
 
-    def generate_pdf(self, result_df: pd.DataFrame, weights, etf_names: Dict[str, str], output_path: str = None, buffer: io.BytesIO = None) -> None:
+    def generate_pdf(
+        self,
+        result_df: pd.DataFrame,
+        weights,
+        etf_names: Dict[str, str],
+        output_path: str = None,
+        buffer: io.BytesIO = None,
+    ) -> None:
         """Write a PDF report with the result table and allocation chart."""
         if buffer is None and output_path is None:
             raise ValueError("Either output_path or buffer must be provided.")
@@ -107,7 +114,7 @@ class ReportGenerator:
         )
 
         story = []
-        story.append(Paragraph(f"ETF全天候配置报告（总金额：{self.total_amount:.2f}元）", title_style))
+        story.append(Paragraph(f"All Weather Strategy Report (Total: {self.total_amount:.2f} CNY)", title_style))
         story.append(Spacer(1, 12))
 
         table_data = [result_df.columns.tolist()] + result_df.values.tolist()
@@ -126,12 +133,12 @@ class ReportGenerator:
                 ]
             )
         )
-        story.append(Paragraph("配置方案详情", section_style))
+        story.append(Paragraph("Allocation Details", section_style))
         story.append(table)
         story.append(Spacer(1, 20))
 
         sorted_pairs = sorted(
-            zip(weights, [self.wrap_text(f"{etf_names[code]}({code})") for code in result_df["ETF代码"]]),
+            zip(weights, [self.wrap_text(f"{etf_names[code]} ({code})") for code in result_df["ETF_CODE"]]),
             key=lambda item: item[0],
             reverse=True,
         )
@@ -143,7 +150,7 @@ class ReportGenerator:
         fig.savefig(image_buffer, format="PNG", dpi=150, bbox_inches="tight")
         image_buffer.seek(0)
         plt.close(fig)
-        story.append(Paragraph("权重分布可视化", section_style))
+        story.append(Paragraph("Weight Distribution", section_style))
         story.append(Image(image_buffer, width=6 * inch, height=4 * inch))
 
         doc.build(story)
