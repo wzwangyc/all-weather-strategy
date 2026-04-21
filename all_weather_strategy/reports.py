@@ -68,7 +68,7 @@ class ReportGenerator:
             wedgeprops={"edgecolor": "white", "linewidth": 1},
         )
         plt.title(
-            f"ETF?????????{self.total_amount:.2f}??",
+            f"ETF权重分布（总金额：{self.total_amount:.2f}元）",
             fontsize=14,
             pad=25,
             fontproperties=self.font_prop,
@@ -107,7 +107,7 @@ class ReportGenerator:
         )
 
         story = []
-        story.append(Paragraph(f"ETF????????????{self.total_amount:.2f}??", title_style))
+        story.append(Paragraph(f"ETF全天候配置报告（总金额：{self.total_amount:.2f}元）", title_style))
         story.append(Spacer(1, 12))
 
         table_data = [result_df.columns.tolist()] + result_df.values.tolist()
@@ -126,12 +126,12 @@ class ReportGenerator:
                 ]
             )
         )
-        story.append(Paragraph("??????", section_style))
+        story.append(Paragraph("配置方案详情", section_style))
         story.append(table)
         story.append(Spacer(1, 20))
 
         sorted_pairs = sorted(
-            zip(weights, [self.wrap_text(f"{etf_names[code]}({code})") for code in result_df["ETF??"]]),
+            zip(weights, [self.wrap_text(f"{etf_names[code]}({code})") for code in result_df["ETF代码"]]),
             key=lambda item: item[0],
             reverse=True,
         )
@@ -143,7 +143,7 @@ class ReportGenerator:
         fig.savefig(image_buffer, format="PNG", dpi=150, bbox_inches="tight")
         image_buffer.seek(0)
         plt.close(fig)
-        story.append(Paragraph("???????", section_style))
+        story.append(Paragraph("权重分布可视化", section_style))
         story.append(Image(image_buffer, width=6 * inch, height=4 * inch))
 
         doc.build(story)
