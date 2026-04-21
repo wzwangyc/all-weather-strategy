@@ -6,9 +6,10 @@ without external services.
 
 import io
 from decimal import Decimal
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 import pandas as pd
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -21,12 +22,13 @@ from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Tabl
 from .paths import FONT_PATH
 
 
-def _register_font() -> str:
-    """Register the bundled Chinese font or fail immediately."""
+def _register_font():
+    """Register the bundled Chinese font and return a FontProperties handle."""
     if not FONT_PATH.exists():
         raise FileNotFoundError(f"Font file not found: {FONT_PATH}")
+    font_manager.fontManager.addfont(str(FONT_PATH))
     pdfmetrics.registerFont(TTFont("SimHei", str(FONT_PATH)))
-    return "SimHei"
+    return font_manager.FontProperties(fname=str(FONT_PATH))
 
 
 class ReportGenerator:
@@ -34,7 +36,8 @@ class ReportGenerator:
 
     def __init__(self, total_amount: Union[Decimal, float]):
         self.total_amount = Decimal(str(total_amount))
-        self.font_name = _register_font()
+        self.font_prop = _register_font()
+        self.font_name = self.font_prop.get_name()
         self.styles = getSampleStyleSheet()
 
     @staticmethod
@@ -51,7 +54,8 @@ class ReportGenerator:
     def create_pie_chart(self, weights, labels):
         """Build the allocation pie chart used in the UI and PDF."""
         fig = plt.figure(figsize=(10, 7))
-        plt.rcParams["font.sans-serif"] = ["SimHei", "Microsoft YaHei", "DejaVu Sans", "sans-serif"]
+        plt.rcParams["font.family"] = "sans-serif"
+        plt.rcParams["font.sans-serif"] = [self.font_name, "Microsoft YaHei", "DejaVu Sans", "sans-serif"]
         plt.rcParams["axes.unicode_minus"] = False
         explode = [0.05] * len(labels)
         plt.pie(
@@ -60,10 +64,15 @@ class ReportGenerator:
             autopct="%1.1f%%",
             startangle=90,
             explode=explode,
-            textprops={"fontsize": 10},
+            textprops={"fontsize": 10, "fontproperties": self.font_prop},
             wedgeprops={"edgecolor": "white", "linewidth": 1},
         )
-        plt.title(f"ETF配置权重分布（总金额：{self.total_amount:.2f}元）", fontsize=14, pad=25)
+        plt.title(
+            f"ETF?????????{self.total_amount:.2f}??",
+            fontsize=14,
+            pad=25,
+            fontproperties=self.font_prop,
+        )
         plt.axis("equal")
         plt.tight_layout()
         return fig
@@ -98,7 +107,7 @@ class ReportGenerator:
         )
 
         story = []
-        story.append(Paragraph(f"ETF全天候配置报告（总金额：{self.total_amount:.2f}元）", title_style))
+        story.append(Paragraph(f"ETF????????????{self.total_amount:.2f}??", title_style))
         story.append(Spacer(1, 12))
 
         table_data = [result_df.columns.tolist()] + result_df.values.tolist()
@@ -117,12 +126,12 @@ class ReportGenerator:
                 ]
             )
         )
-        story.append(Paragraph("配置方案详情", section_style))
+        story.append(Paragraph("??????", section_style))
         story.append(table)
         story.append(Spacer(1, 20))
 
         sorted_pairs = sorted(
-            zip(weights, [self.wrap_text(f"{etf_names[code]}({code})") for code in result_df["ETF代码"]]),
+            zip(weights, [self.wrap_text(f"{etf_names[code]}({code})") for code in result_df["ETF??"]]),
             key=lambda item: item[0],
             reverse=True,
         )
@@ -134,7 +143,7 @@ class ReportGenerator:
         fig.savefig(image_buffer, format="PNG", dpi=150, bbox_inches="tight")
         image_buffer.seek(0)
         plt.close(fig)
-        story.append(Paragraph("权重分布可视化", section_style))
+        story.append(Paragraph("???????", section_style))
         story.append(Image(image_buffer, width=6 * inch, height=4 * inch))
 
         doc.build(story)
