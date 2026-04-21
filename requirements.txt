@@ -1,9 +1,9 @@
 streamlit==1.55.0
-pandas==3.0.2
 matplotlib==3.10.8
 akshare==1.18.21
 yfinance==1.0.0
 tushare==1.4.24
-numpy==2.4.4
-scipy==1.17.1
+pandas==2.2.3
+numpy==2.2.6
+scipy==1.15.2
 reportlab==4.3.1
